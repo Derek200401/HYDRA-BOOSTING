@@ -4,12 +4,15 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Install runtime dependencies inside the image. This avoids Railway/Nixpacks
-# skipping the install layer, which caused express and dotenv to be absent.
+# Copy only package files first (for better layer caching)
 COPY package.json package-lock.json ./
-RUN npm install --omit=dev --no-audit --no-fund
 
+# Install dependencies
+RUN npm ci --omit=dev
+
+# Copy application code
 COPY . .
 
 EXPOSE 3000
+
 CMD ["npm", "start"]
